@@ -18,6 +18,8 @@
 #include <string.h>
 
 #include "lab2_sync_types.h"
+pthread_mutex_t lock;
+
 
 /*
  * TODO
@@ -26,9 +28,15 @@
  *  @param lab2_tree *tree  : bst to print in-order. 
  *  @return                 : status (success or fail)
  */
+
 int lab2_node_print_inorder(lab2_tree *tree) {
-    // You need to implement lab2_node_print_inorder function.
+	if (tree->root != NULL) {
+		lab2_node_print_inorder(tree->left);
+		lab2_node_print_inorder(tree->right);
+	}
+    return LAB2_SUCCESS; // return success value
 }
+
 
 /*
  * TODO
@@ -39,6 +47,9 @@ int lab2_node_print_inorder(lab2_tree *tree) {
  */
 lab2_tree *lab2_tree_create() {
     // You need to implement lab2_tree_create function.
+    lab2_tree *tree = (lab2_tree *)malloc(sizeof(lab2_tree));
+    tree->root = NULL;
+    return tree;	
 }
 
 /*
@@ -51,6 +62,11 @@ lab2_tree *lab2_tree_create() {
  */
 lab2_node * lab2_node_create(int key) {
     // You need to implement lab2_node_create function.
+    lab2_node *node = (lab2_node *)malloc(sizeof(lab2_node));
+    node->left = node;
+	node->right = node;
+	node->key = key;
+    return newNode;
 }
 
 /* 
@@ -61,11 +77,31 @@ lab2_node * lab2_node_create(int key) {
  *  @param lab2_node *new_node  : bst node which you need to insert. 
  *  @return                 : satus (success or fail)
  */
+
 int lab2_node_insert(lab2_tree *tree, lab2_node *new_node){
     // You need to implement lab2_node_insert function.
+    if(tree->root == NULL){    
+        tree->root = new_node;
+        new_node->left = NULL;
+        new_node->right = NULL;
+        return LAB2_ERROR;
+    }
 
+    lab2_node *Cur = tree->root;
+    if(Cur->key < new_node->key){
+        if(Cur->right == NULL){
+            Cur->right = new_node;
+        }
+        lab2_node_insert(Cur->right, new_node);
+    }   
+    else{
+        if(Cur->left ==NULL){
+            Cur->left = new_node;
+        }
+        lab2_node_insert(Cur->left, new_node);
+    }   
+    return LAB2_SUCCESS;//success
 }
-
 /* 
  * TODO
  *  Implement a function which insert nodes from the BST in fine-garined manner.
@@ -75,8 +111,29 @@ int lab2_node_insert(lab2_tree *tree, lab2_node *new_node){
  *  @return                     : status (success or fail)
  */
 int lab2_node_insert_fg(lab2_tree *tree, lab2_node *new_node){
-      // You need to implement lab2_node_insert_fg function.
+    // You need to implement lab2_node_insert_fg function.
+	if(tree->root == NULL){
+        tree->root = new_node;
+        new_node->left = NULL;
+        new_node->right = NULL;
+        return LAB2_ERROR;
+    }   
+    lab2_node *Cur = tree->root;
+    if(Cur->key < new_node->key){
+        if(Cur->right == NULL){
+            Cur->right = new_node;
+        }
+        lab2_node_insert(Cur->right, new_node);
+    }
+    else{
+        if(Cur->left ==NULL){
+            Cur->left = new_node;
+        }
+        lab2_node_insert(Cur->left, new_node);
+    }
+    return LAB2_SUCCESS; //success
 }
+
 
 /* 
  * TODO
@@ -88,7 +145,32 @@ int lab2_node_insert_fg(lab2_tree *tree, lab2_node *new_node){
  */
 int lab2_node_insert_cg(lab2_tree *tree, lab2_node *new_node){
     // You need to implement lab2_node_insert_cg function.
+    pthread_mutex_lock(&lock); //locking
+	if(tree->root == NULL){  
+        tree->root = new_node;
+        new_node->left = NULL;
+        new_node->right = NULL;
+		pthread_mutex_unlock(&lock); //unlocking
+        return LAB2_ERROR;
+    }   
+    lab2_node *Cur = tree->root;
+    if(Cur->key < new_node->key){
+        if(Cur->right == NULL){
+    
+            Cur->right = new_node;
+        }
+        lab2_node_insert(Cur->right, new_node);
+    }   
+    else{
+        if(Cur->left ==NULL){
+            Cur->left = new_node;
+        }
+        lab2_node_insert(Cur->left, new_node);
+    }
+	pthread_mutex_unlock(&lock); //unlocking
+    return LAB2_SUCCESS; //success
 }
+
 
 /* 
  * TODO
@@ -98,8 +180,70 @@ int lab2_node_insert_cg(lab2_tree *tree, lab2_node *new_node){
  *  @param int key          : key value that you want to delete. 
  *  @return                 : status (success or fail)
  */
+
 int lab2_node_remove(lab2_tree *tree, int key) {
-    // You need to implement lab2_node_remove function.
+	// You need to implement lab2_node_remove function.
+	lab2_tree* cur2 = NULL;
+	lab2_tree* cur = tree->root;
+	lab2_tree* par_parent = NULL;
+	lab2_tree* parent = NULL;
+	lab2_tree* child = NULL;
+	lab2_tree* left_temp = NULL;
+	int key_return = 0;
+	while(cur->key != key){
+		if(key > cur->key)
+		{
+			par_parent = parent;
+			parent = cur;
+			cur = cur->right; 
+		}
+		else{  
+			par_parent = parent;
+			parent = cur;
+			cur = cur->left;
+		}
+	} // find the node
+
+	if(cur->left == NULL && cur->right = NULL){ // if it is a terminal node
+		key_return = cur->key;
+		if(parent->left == cur)
+			parent->left = NULL;
+		if(parent->right == cur)
+			parent->right = NULL;
+	}
+   
+	if(cur->left == NULL || cur->right ==NULL){ // only has one child
+		child = (cur->left != NULL)? cur->left : cur->right;
+		if(parent->left ==cur)
+			parent->left = child;
+		else
+			parent->right = child;
+   }
+
+   if(cur->left !=NULL && cur->right !=NULL) // if it has two child
+   {
+      cur2 = cur;
+      cur2 = cur2->right;
+      if(cur2->left == NULL){
+         left_temp = cur->left;
+         child = cur2;
+         if(parent->right == cur){
+            parent->right = child;
+            child->left = left_temp;
+         }
+         else if(parent->left == cur){
+            parent->left = child;
+            child->left = left_temp;
+         }
+      }
+      while(cur2->left !=NULL){
+         parent = cur2;
+         cur2 = cur2->left;
+      }
+      parent->left = NULL;
+      cur->key = cur2->key;
+   }
+   return LAB2_SUCCESS;
 }
 
 /* 
@@ -112,6 +256,67 @@ int lab2_node_remove(lab2_tree *tree, int key) {
  */
 int lab2_node_remove_fg(lab2_tree *tree, int key) {
     // You need to implement lab2_node_remove_fg function.
+	lab2_tree* cur2 = NULL;
+	lab2_tree* cur = tree->root;
+	lab2_tree* par_parent = NULL;
+	lab2_tree* parent = NULL;
+	lab2_tree* child = NULL;
+	lab2_tree* left_temp = NULL;
+	int key_return = 0;
+	while(cur->key != key){
+		if(key > cur->key)
+		{
+			par_parent = parent;
+			parent = cur;
+			cur = cur->right; 
+		}
+		else{  
+			par_parent = parent;
+			parent = cur;
+			cur = cur->left;
+		}
+	} // find the node
+
+	if(cur->left == NULL && cur->right = NULL){ // if it is a terminal node
+		key_return = cur->key;
+		if(parent->left == cur)
+			parent->left = NULL;
+		if(parent->right == cur)
+			parent->right = NULL;
+	}
+   
+	if(cur->left == NULL || cur->right ==NULL){ // only has one child
+		child = (cur->left != NULL)? cur->left : cur->right;
+		if(parent->left ==cur)
+			parent->left = child;
+		else
+			parent->right = child;
+   }
+
+   if(cur->left !=NULL && cur->right !=NULL) // if it has two child
+   {
+      cur2 = cur;
+      cur2 = cur2->right;
+      if(cur2->left == NULL){
+         left_temp = cur->left;
+         child = cur2;
+         if(parent->right == cur){
+            parent->right = child;
+            child->left = left_temp;
+         }
+         else if(parent->left == cur){
+            parent->left = child;
+            child->left = left_temp;
+         }
+      }
+      while(cur2->left !=NULL){
+         parent = cur2;
+         cur2 = cur2->left;
+      }
+      parent->left = NULL;
+      cur->key = cur2->key;
+   }
+   return LAB2_SUCCESS;
 }
 
 
@@ -125,6 +330,68 @@ int lab2_node_remove_fg(lab2_tree *tree, int key) {
  */
 int lab2_node_remove_cg(lab2_tree *tree, int key) {
     // You need to implement lab2_node_remove_cg function.
+//	pthread_mutex_lock(&lock); // locking
+	lab2_tree* cur2 = NULL;
+	lab2_tree* cur = tree->root;
+	lab2_tree* par_parent = NULL;
+	lab2_tree* parent = NULL;
+	lab2_tree* child = NULL;
+	lab2_tree* left_temp = NULL;
+	int key_return = 0;
+	while(cur->key != key){
+		if(key > cur->key)
+		{
+			par_parent = parent;
+			parent = cur;
+			cur = cur->right; 
+		}
+		else{  
+			par_parent = parent;
+			parent = cur;
+			cur = cur->left;
+		}
+	} // find the node
+
+	if(cur->left == NULL && cur->right = NULL){ // if it is a terminal node
+		key_return = cur->key;
+		if(parent->left == cur)
+			parent->left = NULL;
+		if(parent->right == cur)
+			parent->right = NULL;
+	}
+   
+	if(cur->left == NULL || cur->right ==NULL){ // only has one child
+		child = (cur->left != NULL)? cur->left : cur->right;
+		if(parent->left ==cur)
+			parent->left = child;
+		else
+			parent->right = child;
+   }
+
+   if(cur->left !=NULL && cur->right !=NULL) // if it has two child
+   {
+      cur2 = cur;
+      cur2 = cur2->right;
+      if(cur2->left == NULL){
+         left_temp = cur->left;
+         child = cur2;
+         if(parent->right == cur){
+            parent->right = child;
+            child->left = left_temp;
+         }
+         else if(parent->left == cur){
+            parent->left = child;
+            child->left = left_temp;
+         }
+      }
+      while(cur2->left !=NULL){
+         parent = cur2;
+         cur2 = cur2->left;
+      }
+      parent->left = NULL;
+      cur->key = cur2->key;
+   }
+   return LAB2_SUCCESS;
 }
 
 
@@ -138,6 +405,8 @@ int lab2_node_remove_cg(lab2_tree *tree, int key) {
  */
 void lab2_tree_delete(lab2_tree *tree) {
     // You need to implement lab2_tree_delete function.
+	free(tree);
+	return LAB2_SUCCESS; // success
 }
 
 /*
@@ -150,5 +419,7 @@ void lab2_tree_delete(lab2_tree *tree) {
  */
 void lab2_node_delete(lab2_node *node) {
     // You need to implement lab2_node_delete function.
+	free(node);
+	return LAB2_SUCCESS;
 }
 
