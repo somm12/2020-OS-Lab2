@@ -118,15 +118,15 @@ int lab2_node_insert(lab2_tree *tree, lab2_node *new_node){
     while (1) {
         if (cur->key < new_node->key) {
             if (cur->right == NULL) {
-                cur->right = new_node;
-                return LAB2_SUCCESS;
+				cur->right = new_node;
+				return LAB2_SUCCESS;
             }
             cur = cur->right;
         }
         else {
-            if (cur->left == NULL) {
-                cur->left = new_node;
-                return LAB2_SUCCESS;
+			if (cur->left == NULL) {
+				cur->left = new_node;
+				return LAB2_SUCCESS;
             }
             cur = cur->left;
         }
@@ -152,20 +152,21 @@ int lab2_node_insert_fg(lab2_tree *tree, lab2_node *new_node){
     }   
     lab2_node* cur = tree->root;
     while (1) {
-        pthread_mutex_lock(&lock);
 		if (cur->key < new_node->key) {
-            if (cur->right == NULL) {
-                cur->right = new_node;
+			if (cur->right == NULL) {
+				pthread_mutex_lock(&lock);
+				cur->right = new_node;
 				pthread_mutex_unlock(&lock);
-                return LAB2_SUCCESS;
+				return LAB2_SUCCESS;
             }
             cur = cur->right;
         }
         else {
             if (cur->left == NULL) {
-                cur->left = new_node;
+				pthread_mutex_lock(&lock);
+				cur->left = new_node;
 				pthread_mutex_unlock(&lock);
-                return LAB2_SUCCESS;
+				return LAB2_SUCCESS;
             }
             cur = cur->left;
         }
@@ -258,7 +259,7 @@ int lab2_node_remove(lab2_tree *tree, int key) {
    
 	if(cur->left == NULL || cur->right ==NULL){ // only has one child
 		child = (cur->left != NULL)? cur->left : cur->right;
-		if(parent->left ==cur)
+		if(parent->left == cur)
 			parent->left = child;
 		else
 			parent->right = child;
