@@ -16,6 +16,7 @@
 #include <assert.h>
 #include <pthread.h>
 #include <string.h>
+#include <stdbool.h>
 
 #include "lab2_sync_types.h"
 pthread_mutex_t lock;
@@ -84,29 +85,52 @@ lab2_node * lab2_node_create(int key) {
  *  @return                 : satus (success or fail)
  */
 
+_Bool search_key(lab2_tree* tree, int key){
+	lab2_node* cur = tree->root;
+	while(1){
+		if(cur->key == key){
+			return true;
+		}
+		if(cur->key < key){
+			if (cur->right == NULL)
+				return false;
+			cur = cur->right;
+		}
+		else{
+			if (cur->left == NULL)
+				return false;
+			cur = cur->left;
+		}
+	}
+}
+
 int lab2_node_insert(lab2_tree *tree, lab2_node *new_node){
     // You need to implement lab2_node_insert function.
-    if(tree->root == NULL){    
+	if (tree->root == NULL) {
         tree->root = new_node;
-        new_node->left = NULL;
-        new_node->right = NULL;
         return LAB2_ERROR;
     }
-
-    lab2_node *Cur = tree->root;
-    if(Cur->key < new_node->key){
-        if(Cur->right == NULL){
-            Cur->right = new_node;
+    if (search_key(tree,new_node->key)) {
+        printf("the key value already exists\n");
+        return LAB2_ERROR;
+    }
+    lab2_node* cur = tree->root;
+    while (1) {
+        if (cur->key < new_node->key) {
+            if (cur->right == NULL) {
+                cur->right = new_node;
+                return LAB2_SUCCESS;
+            }
+            cur = cur->right;
         }
-        lab2_node_insert(Cur->right, new_node);
-    }   
-    else{
-        if(Cur->left ==NULL){
-            Cur->left = new_node;
+        else {
+            if (cur->left == NULL) {
+                cur->left = new_node;
+                return LAB2_SUCCESS;
+            }
+            cur = cur->left;
         }
-        lab2_node_insert(Cur->left, new_node);
-    }   
-    return LAB2_SUCCESS;//success
+    }
 }
 /* 
  * TODO
@@ -117,29 +141,36 @@ int lab2_node_insert(lab2_tree *tree, lab2_node *new_node){
  *  @return                     : status (success or fail)
  */
 int lab2_node_insert_fg(lab2_tree *tree, lab2_node *new_node){
-    // You need to implement lab2_node_insert_fg function.
-	if(tree->root == NULL){
+    // You need to implement lab2_node_insert function.
+    if (tree->root == NULL) {
         tree->root = new_node;
-        new_node->left = NULL;
-        new_node->right = NULL;
         return LAB2_ERROR;
     }   
-    lab2_node *Cur = tree->root;
-    if(Cur->key < new_node->key){
-        if(Cur->right == NULL){
-            Cur->right = new_node;
+    if (search_key(tree,new_node->key)) {
+        printf("the key value already exists\n");
+        return LAB2_ERROR;
+    }   
+    lab2_node* cur = tree->root;
+    while (1) {
+        pthread_mutex_lock(&lock);
+		if (cur->key < new_node->key) {
+            if (cur->right == NULL) {
+                cur->right = new_node;
+				pthread_mutex_unlock(&lock);
+                return LAB2_SUCCESS;
+            }
+            cur = cur->right;
         }
-        lab2_node_insert(Cur->right, new_node);
-    }
-    else{
-        if(Cur->left ==NULL){
-            Cur->left = new_node;
+        else {
+            if (cur->left == NULL) {
+                cur->left = new_node;
+				pthread_mutex_unlock(&lock);
+                return LAB2_SUCCESS;
+            }
+            cur = cur->left;
         }
-        lab2_node_insert(Cur->left, new_node);
-    }
-    return LAB2_SUCCESS; //success
+    }   
 }
-
 
 /* 
  * TODO
@@ -149,32 +180,39 @@ int lab2_node_insert_fg(lab2_tree *tree, lab2_node *new_node){
  *  @param lab2_node *new_node  : bst node which you need to insert. 
  *  @return                     : status (success or fail)
  */
+
 int lab2_node_insert_cg(lab2_tree *tree, lab2_node *new_node){
-    // You need to implement lab2_node_insert_cg function.
-    pthread_mutex_lock(&lock); //locking
-	if(tree->root == NULL){  
+    // You need to implement lab2_node_insert function.
+    pthread_mutex_lock(&lock);
+	if (tree->root == NULL) {
         tree->root = new_node;
-        new_node->left = NULL;
-        new_node->right = NULL;
-		pthread_mutex_unlock(&lock); //unlocking
+		pthread_mutex_unlock(&lock);
         return LAB2_ERROR;
     }   
-    lab2_node *Cur = tree->root;
-    if(Cur->key < new_node->key){
-        if(Cur->right == NULL){
-    
-            Cur->right = new_node;
-        }
-        lab2_node_insert(Cur->right, new_node);
+    if (search_key(tree,new_node->key)) {
+        printf("the key value already exists\n");
+        pthread_mutex_unlock(&lock);
+		return LAB2_ERROR;
     }   
-    else{
-        if(Cur->left ==NULL){
-            Cur->left = new_node;
+    lab2_node* cur = tree->root;
+    while (1) {
+        if (cur->key < new_node->key) {
+            if (cur->right == NULL) {
+                cur->right = new_node;
+                pthread_mutex_unlock(&lock);
+                return LAB2_SUCCESS;
+            }
+            cur = cur->right;
         }
-        lab2_node_insert(Cur->left, new_node);
-    }
-	pthread_mutex_unlock(&lock); //unlocking
-    return LAB2_SUCCESS; //success
+        else {
+            if (cur->left == NULL) {
+                cur->left = new_node;
+                pthread_mutex_unlock(&lock);
+                return LAB2_SUCCESS;
+            }
+            cur = cur->left;
+        }
+    }   
 }
 
 
