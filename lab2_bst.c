@@ -235,15 +235,11 @@ int lab2_node_remove(lab2_tree *tree, int key) {
 	while(cur->key != key){
 		if(key > cur->key)
 		{
-			if (cur->right == NULL)
-				return LAB2_ERROR;
 			par_parent = parent;
 			parent = cur;
 			cur = cur->right; 
 		}
 		else{
-			if (cur->left == NULL)
-				return LAB2_ERROR;
 			par_parent = parent;
 			parent = cur;
 			cur = cur->left;
