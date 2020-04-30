@@ -91,7 +91,7 @@ _Bool search_key(lab2_tree* tree, int key){
 		if(cur->key == key){
 			return true;
 		}
-		if(cur->key < key){
+		else if(cur->key < key){
 			if (cur->right == NULL)
 				return false;
 			cur = cur->right;
@@ -111,7 +111,6 @@ int lab2_node_insert(lab2_tree *tree, lab2_node *new_node){
         return LAB2_ERROR;
     }
     if (search_key(tree,new_node->key)) {
-        printf("the key value already exists\n");
         return LAB2_ERROR;
     }
     lab2_node* cur = tree->root;
@@ -147,27 +146,22 @@ int lab2_node_insert_fg(lab2_tree *tree, lab2_node *new_node){
         return LAB2_ERROR;
     }   
     if (search_key(tree,new_node->key)) {
-        printf("the key value already exists\n");
         return LAB2_ERROR;
     }   
     lab2_node* cur = tree->root;
     while (1) {
 		if (cur->key < new_node->key) {
 			if (cur->right == NULL) {
-				pthread_mutex_lock(&lock);
 				cur->right = new_node;
-				pthread_mutex_unlock(&lock);
 				return LAB2_SUCCESS;
-            }
+			}
             cur = cur->right;
         }
         else {
             if (cur->left == NULL) {
-				pthread_mutex_lock(&lock);
 				cur->left = new_node;
-				pthread_mutex_unlock(&lock);
 				return LAB2_SUCCESS;
-            }
+			}
             cur = cur->left;
         }
     }   
@@ -191,7 +185,6 @@ int lab2_node_insert_cg(lab2_tree *tree, lab2_node *new_node){
         return LAB2_ERROR;
     }   
     if (search_key(tree,new_node->key)) {
-        printf("the key value already exists\n");
         pthread_mutex_unlock(&lock);
 		return LAB2_ERROR;
     }   
@@ -234,19 +227,23 @@ int lab2_node_remove(lab2_tree *tree, int key) {
 	lab2_node* parent = NULL;
 	lab2_node* child = NULL;
 	lab2_node* left_temp = NULL;
-	
+	lab2_node* temp = NULL;
 	if(!search_key(tree, key)){
-		printf("there is no key value in this tree\n");
 		return LAB2_ERROR;
 	}
+
 	while(cur->key != key){
 		if(key > cur->key)
 		{
+			if (cur->right == NULL)
+				return LAB2_ERROR;
 			par_parent = parent;
 			parent = cur;
 			cur = cur->right; 
 		}
 		else{
+			if (cur->left == NULL)
+				return LAB2_ERROR;
 			par_parent = parent;
 			parent = cur;
 			cur = cur->left;
@@ -254,43 +251,50 @@ int lab2_node_remove(lab2_tree *tree, int key) {
 	} // find the node
 
 	if(cur->left == NULL && cur->right == NULL){ // if it is a terminal node
-		if(parent->left == cur)
+		if (cur == tree->root){
+			tree->root = NULL;
+			return LAB2_SUCCESS;
+		}
+		else if(parent->left == cur)
 			parent->left = NULL;
 		else if(parent->right == cur)
 			parent->right = NULL;
 	}
    
-	else if(cur->left == NULL || cur->right ==NULL){ // only has one child
+	else if(cur->left == NULL || cur->right == NULL){ // only has one child
 		child = (cur->left != NULL)? cur->left : cur->right;
-		if(parent->left == cur)
+		if (cur == tree->root)
+			tree->root = child;
+		else if(parent->left == cur)
 			parent->left = child;
 		else
 			parent->right = child;
 	}	
 
-	else if(cur->left !=NULL && cur->right !=NULL) // if it has two child
+	else if((cur->left !=NULL) && (cur->right !=NULL)) // if it has two child
 	{
-      cur2 = cur;
-      cur2 = cur2->right;
-      if(cur2->left == NULL){
-         left_temp = cur->left;
-         child = cur2;
-         if(parent->right == cur){
-            parent->right = child;
-            child->left = left_temp;
-         }
-         else if(parent->left == cur){
-            parent->left = child;
-            child->left = left_temp;
-         }
-      }
-      while(cur2->left !=NULL){
-         parent = cur2;
-         cur2 = cur2->left;
-      }
-      parent->left = NULL;
-      cur->key = cur2->key;
-   }
+      parent = cur;
+	  cur = cur->right;
+	  temp = cur;
+      
+	  while(1){
+		  if ((cur->right) == NULL)
+			  break;
+		  else{
+			  cur2 = cur;
+			  cur = cur->right;
+		  }
+	  }
+	  (parent->key) = (cur->key);
+	  if (cur2 != cur){
+		  if ((cur->left) != NULL)
+			  temp->right = cur->left;
+		  else
+			  temp->right = NULL;
+	  }
+	  else
+		  cur2->left = cur->left;
+	}
    return LAB2_SUCCESS;
 }
 
@@ -312,7 +316,6 @@ int lab2_node_remove_fg(lab2_tree *tree, int key) {
 	lab2_node* left_temp = NULL;
 	
 	if(!search_key(tree, key)){
-		printf("there is no key value in this tree\n");
 		return LAB2_ERROR;
 	}
 	while(cur->key != key){
@@ -391,7 +394,6 @@ int lab2_node_remove_cg(lab2_tree *tree, int key) {
 	lab2_node* left_temp = NULL;
 	
 	if(!search_key(tree, key)){
-		printf("there is no key value in this tree\n");
 		pthread_mutex_unlock(&lock);
 		return LAB2_ERROR;
 	}
