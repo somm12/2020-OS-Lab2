@@ -234,7 +234,11 @@ int lab2_node_remove(lab2_tree *tree, int key) {
 	lab2_node* parent = NULL;
 	lab2_node* child = NULL;
 	lab2_node* left_temp = NULL;
-	int key_return = 0;
+	
+	if(!search_key(tree, key)){
+		printf("there is no key value in this tree\n");
+		return LAB2_ERROR;
+	}
 	while(cur->key != key){
 		if(key > cur->key)
 		{
@@ -242,7 +246,7 @@ int lab2_node_remove(lab2_tree *tree, int key) {
 			parent = cur;
 			cur = cur->right; 
 		}
-		else{  
+		else{
 			par_parent = parent;
 			parent = cur;
 			cur = cur->left;
@@ -250,23 +254,22 @@ int lab2_node_remove(lab2_tree *tree, int key) {
 	} // find the node
 
 	if(cur->left == NULL && cur->right == NULL){ // if it is a terminal node
-		key_return = cur->key;
 		if(parent->left == cur)
 			parent->left = NULL;
-		if(parent->right == cur)
+		else if(parent->right == cur)
 			parent->right = NULL;
 	}
    
-	if(cur->left == NULL || cur->right ==NULL){ // only has one child
+	else if(cur->left == NULL || cur->right ==NULL){ // only has one child
 		child = (cur->left != NULL)? cur->left : cur->right;
 		if(parent->left == cur)
 			parent->left = child;
 		else
 			parent->right = child;
-   }
+	}	
 
-   if(cur->left !=NULL && cur->right !=NULL) // if it has two child
-   {
+	else if(cur->left !=NULL && cur->right !=NULL) // if it has two child
+	{
       cur2 = cur;
       cur2 = cur2->right;
       if(cur2->left == NULL){
@@ -300,14 +303,18 @@ int lab2_node_remove(lab2_tree *tree, int key) {
  *  @return                 : status (success or fail)
  */
 int lab2_node_remove_fg(lab2_tree *tree, int key) {
-    // You need to implement lab2_node_remove_fg function.
+	// You need to implement lab2_node_remove function.
 	lab2_node* cur2 = NULL;
 	lab2_node* cur = tree->root;
 	lab2_node* par_parent = NULL;
 	lab2_node* parent = NULL;
 	lab2_node* child = NULL;
 	lab2_node* left_temp = NULL;
-	int key_return = 0;
+	
+	if(!search_key(tree, key)){
+		printf("there is no key value in this tree\n");
+		return LAB2_ERROR;
+	}
 	while(cur->key != key){
 		if(key > cur->key)
 		{
@@ -315,31 +322,30 @@ int lab2_node_remove_fg(lab2_tree *tree, int key) {
 			parent = cur;
 			cur = cur->right; 
 		}
-		else{  
+		else{
 			par_parent = parent;
 			parent = cur;
 			cur = cur->left;
 		}
 	} // find the node
-
+	pthread_mutex_lock(&lock);
 	if(cur->left == NULL && cur->right == NULL){ // if it is a terminal node
-		key_return = cur->key;
 		if(parent->left == cur)
 			parent->left = NULL;
-		if(parent->right == cur)
+		else if(parent->right == cur)
 			parent->right = NULL;
 	}
    
-	if(cur->left == NULL || cur->right ==NULL){ // only has one child
+	else if(cur->left == NULL || cur->right ==NULL){ // only has one child
 		child = (cur->left != NULL)? cur->left : cur->right;
-		if(parent->left ==cur)
+		if(parent->left == cur)
 			parent->left = child;
 		else
 			parent->right = child;
-   }
+	}	
 
-   if(cur->left !=NULL && cur->right !=NULL) // if it has two child
-   {
+	else if(cur->left !=NULL && cur->right !=NULL) // if it has two child
+	{
       cur2 = cur;
       cur2 = cur2->right;
       if(cur2->left == NULL){
@@ -361,9 +367,9 @@ int lab2_node_remove_fg(lab2_tree *tree, int key) {
       parent->left = NULL;
       cur->key = cur2->key;
    }
-   return LAB2_SUCCESS;
+	pthread_mutex_unlock(&lock);
+	return LAB2_SUCCESS;
 }
-
 
 /* 
  * TODO
@@ -373,16 +379,22 @@ int lab2_node_remove_fg(lab2_tree *tree, int key) {
  *  @param int key          : key value that you want to delete. 
  *  @return                 : status (success or fail)
  */
+
 int lab2_node_remove_cg(lab2_tree *tree, int key) {
-    // You need to implement lab2_node_remove_cg function.
-//	pthread_mutex_lock(&lock); // locking
+	// You need to implement lab2_node_remove function.
+	pthread_mutex_lock(&lock);
 	lab2_node* cur2 = NULL;
 	lab2_node* cur = tree->root;
 	lab2_node* par_parent = NULL;
 	lab2_node* parent = NULL;
 	lab2_node* child = NULL;
 	lab2_node* left_temp = NULL;
-	int key_return = 0;
+	
+	if(!search_key(tree, key)){
+		printf("there is no key value in this tree\n");
+		pthread_mutex_unlock(&lock);
+		return LAB2_ERROR;
+	}
 	while(cur->key != key){
 		if(key > cur->key)
 		{
@@ -390,7 +402,7 @@ int lab2_node_remove_cg(lab2_tree *tree, int key) {
 			parent = cur;
 			cur = cur->right; 
 		}
-		else{  
+		else{
 			par_parent = parent;
 			parent = cur;
 			cur = cur->left;
@@ -398,23 +410,22 @@ int lab2_node_remove_cg(lab2_tree *tree, int key) {
 	} // find the node
 
 	if(cur->left == NULL && cur->right == NULL){ // if it is a terminal node
-		key_return = cur->key;
 		if(parent->left == cur)
 			parent->left = NULL;
-		if(parent->right == cur)
+		else if(parent->right == cur)
 			parent->right = NULL;
 	}
    
-	if(cur->left == NULL || cur->right ==NULL){ // only has one child
+	else if(cur->left == NULL || cur->right ==NULL){ // only has one child
 		child = (cur->left != NULL)? cur->left : cur->right;
-		if(parent->left ==cur)
+		if(parent->left == cur)
 			parent->left = child;
 		else
 			parent->right = child;
-   }
+	}	
 
-   if(cur->left !=NULL && cur->right !=NULL) // if it has two child
-   {
+	else if(cur->left !=NULL && cur->right !=NULL) // if it has two child
+	{
       cur2 = cur;
       cur2 = cur2->right;
       if(cur2->left == NULL){
@@ -430,15 +441,15 @@ int lab2_node_remove_cg(lab2_tree *tree, int key) {
          }
       }
       while(cur2->left !=NULL){
-         parent = cur2;
-         cur2 = cur2->left;
-      }
-      parent->left = NULL;
-      cur->key = cur2->key;
-   }
-   return LAB2_SUCCESS;
+			parent = cur2;
+			cur2 = cur2->left;
+		}
+		parent->left = NULL;
+		cur->key = cur2->key;
+	}
+	pthread_mutex_unlock(&lock);
+	return LAB2_SUCCESS;
 }
-
 
 /*
  * TODO
@@ -467,4 +478,3 @@ int lab2_node_delete(lab2_node *node) {
 	free(node);
 	return LAB2_SUCCESS;
 }
-
