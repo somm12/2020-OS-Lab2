@@ -274,22 +274,22 @@ int lab2_node_remove(lab2_tree *tree, int key) {
 	  temp = cur;
       
 	  while(1){
-		  if ((cur->right) == NULL)
+		  if ((cur->left) == NULL)
 			  break;
 		  else{
-			  cur2 = cur;
-			  cur = cur->right;
+			  temp = cur;
+			  cur = cur->left;
 		  }
 	  }
 	  (parent->key) = (cur->key);
-	  if (cur2 != cur){
-		  if ((cur->left) != NULL)
-			  temp->right = cur->left;
+	  if (temp != cur){
+		  if ((cur->right) != NULL)
+			  temp->left = cur->right;
 		  else
-			  temp->right = NULL;
+			  temp->left = NULL;
 	  }
 	  else
-		  cur2->left = cur->left;
+		  temp->right = cur->right;
 	}
    return LAB2_SUCCESS;
 }
