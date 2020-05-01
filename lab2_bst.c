@@ -223,7 +223,7 @@ int lab2_node_remove(lab2_tree *tree, int key) {
 	lab2_node* parent = NULL;
 	lab2_node* par_parent = NULL;
 	lab2_node* child = NULL;
-	lab2_node* temp = NULL;
+	lab2_node* cur2 = NULL;
 	if(!search_key(tree, key)){
 		return LAB2_ERROR;
 	}
@@ -263,29 +263,26 @@ int lab2_node_remove(lab2_tree *tree, int key) {
 			parent->right = child;
 	}	
 
-	else if((cur->left !=NULL) && (cur->right !=NULL)) // if it has two child
+	else if (cur->left != NULL && cur->right != NULL)
 	{
 		parent = cur;
-		cur = cur->right;
-		temp = cur;
+		cur2 = cur->right;
+		while (cur2->left != NULL)
+		{
+			parent = cur2;
+			cur2 = cur2->left;
+		}
 
-		while(1){
-			if ((cur->left) == NULL)
-				break;
-			else{
-				temp = cur;
-				cur = cur->left;
-			}
-		}
-		(parent->key) = (cur->key);
-		if (temp != cur){
-			if ((cur->right) != NULL)
-				temp->left = cur->right;
-			else
-				temp->left = NULL;
-		}
+		if (parent->left == cur2)
+			parent->left = cur2->right;
 		else
-			temp->right = cur->right;
+			parent->right = cur2->right;
+
+
+		cur->key = cur2->key;
+		cur = cur2;
+		free(cur);
+
 	}
 	return LAB2_SUCCESS;
 }
@@ -304,7 +301,7 @@ int lab2_node_remove_fg(lab2_tree *tree, int key) {
 	lab2_node* parent = NULL;
 	lab2_node* par_parent = NULL;
 	lab2_node* child = NULL;
-	lab2_node* temp = NULL;
+	lab2_node* cur2 = NULL;
 	if(!search_key(tree, key)){
 		return LAB2_ERROR;
 	}
@@ -345,30 +342,26 @@ int lab2_node_remove_fg(lab2_tree *tree, int key) {
 			parent->right = child;
 	}	
 
-	else if((cur->left !=NULL) && (cur->right !=NULL)) // if it has two child
-	{
-		parent = cur;
-		cur = cur->right;
-		temp = cur;
+	else if (cur->left != NULL && cur->right != NULL)
+    {   
+        parent = cur;
+        cur2 = cur->right;
+        while (cur2->left != NULL)
+        {
+            parent = cur2;
+            cur2 = cur2->left;
+        }   
 
-		while(1){
-			if ((cur->left) == NULL)
-				break;
-			else{
-				temp = cur;
-				cur = cur->left;
-			}
-		}
-		(parent->key) = (cur->key);
-		if (temp != cur){
-			if ((cur->right) != NULL)
-				temp->left = cur->right;
-			else
-				temp->left = NULL;
-		}
-		else
-			temp->right = cur->right;
-	}
+        if (parent->left == cur2)
+            parent->left = cur2->right;
+        else
+            parent->right = cur2->right;
+
+
+        cur->key = cur2->key;
+        cur = cur2;
+        free(cur);
+    }   
 	pthread_mutex_unlock(&lock);
 	return LAB2_SUCCESS;
 }
@@ -389,7 +382,7 @@ int lab2_node_remove_cg(lab2_tree *tree, int key) {
 	lab2_node* parent = NULL;
 	lab2_node* par_parent = NULL;
 	lab2_node* child = NULL;
-	lab2_node* temp = NULL;
+	lab2_node* cur2 = NULL;
 	if(!search_key(tree, key)){
 		pthread_mutex_unlock(&lock);
 		return LAB2_ERROR;
@@ -430,31 +423,26 @@ int lab2_node_remove_cg(lab2_tree *tree, int key) {
 		else
 			parent->right = child;
 	}	
+    else if (cur->left != NULL && cur->right != NULL)
+    {   
+        parent = cur;
+        cur2 = cur->right;
+        while (cur2->left != NULL)
+        {
+            parent = cur2;
+            cur2 = cur2->left;
+        }   
 
-	else if((cur->left !=NULL) && (cur->right !=NULL)) // if it has two child
-	{
-		parent = cur;
-		cur = cur->right;
-		temp = cur;
+        if (parent->left == cur2)
+            parent->left = cur2->right;
+        else
+            parent->right = cur2->right;
 
-		while(1){
-			if ((cur->left) == NULL)
-				break;
-			else{
-				temp = cur;
-				cur = cur->left;
-			}
-		}
-		(parent->key) = (cur->key);
-		if (temp != cur){
-			if ((cur->right) != NULL)
-				temp->left = cur->right;
-			else
-				temp->left = NULL;
-		}
-		else
-			temp->right = cur->right;
-	}
+
+        cur->key = cur2->key;
+        cur = cur2;
+        free(cur);
+    }   
 	pthread_mutex_unlock(&lock);
 	return LAB2_SUCCESS;
 }
