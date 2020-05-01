@@ -1,15 +1,15 @@
 /*
-*	Operating System Lab
-*	    Lab2 (Synchronization)
-*	    Student id : 
-*	    Student name : 
-*
-*   lab2_bst.c :
-*       - thread-safe bst code.
-*       - coarse-grained, fine-grained lock code
-*
-*   Implement thread-safe bst for coarse-grained version and fine-grained version.
-*/
+ *	Operating System Lab
+ *	    Lab2 (Synchronization)
+ *	    Student id : 
+ *	    Student name : 
+ *
+ *   lab2_bst.c :
+ *       - thread-safe bst code.
+ *       - coarse-grained, fine-grained lock code
+ *
+ *   Implement thread-safe bst for coarse-grained version and fine-grained version.
+ */
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -30,20 +30,18 @@ pthread_mutex_t lock;
  *  @return                 : status (success or fail)
  */
 
-void lab2_node_inorder(lab2_tree *tree, lab2_node *cur) // inorder function
-{
-    if (cur != NULL) {
-        lab2_node_inorder(tree, cur->left);
-        lab2_node_inorder(tree, cur->right);
-    }   
+void lab2_node_inorder(lab2_tree *tree, lab2_node *cur) { // inorder function
+	// You need to implement lab2_node_print_inorder function.
+	if (cur != NULL) {
+		lab2_node_inorder(tree, cur->left);
+		lab2_node_inorder(tree, cur->right);
+	}
 }
 
 int lab2_node_print_inorder(lab2_tree *tree) { //inorder print function
-    lab2_node_inorder(tree, tree->root);
-    return LAB2_SUCCESS; // return success value
+	lab2_node_inorder(tree, tree->root);
+	return LAB2_SUCCESS; // return success value
 }
-
-
 
 /*
  * TODO
@@ -53,10 +51,10 @@ int lab2_node_print_inorder(lab2_tree *tree) { //inorder print function
  *  @return                 : bst which you created in this function.
  */
 lab2_tree *lab2_tree_create() {
-    // You need to implement lab2_tree_create function.
-    lab2_tree *tree = (lab2_tree *)malloc(sizeof(lab2_tree));
-    tree->root = NULL;
-    return tree;	
+	// You need to implement lab2_tree_create function.
+	lab2_tree *tree = (lab2_tree *)malloc(sizeof(lab2_tree));
+	tree->root = NULL;
+	return tree;	
 }
 
 /*
@@ -68,12 +66,12 @@ lab2_tree *lab2_tree_create() {
  *  @return                 : bst node which you created in this function.
  */
 lab2_node * lab2_node_create(int key) {
-    // You need to implement lab2_node_create function.
-    lab2_node *node = (lab2_node *)malloc(sizeof(lab2_node));
-    node->left = NULL;
+	// You need to implement lab2_node_create function.
+	lab2_node *node = (lab2_node *)malloc(sizeof(lab2_node));
+	node->left = NULL;
 	node->right = NULL;
 	node->key = key;
-    return node;
+	return node;
 }
 
 /* 
@@ -105,31 +103,31 @@ _Bool search_key(lab2_tree* tree, int key){
 }
 
 int lab2_node_insert(lab2_tree *tree, lab2_node *new_node){
-    // You need to implement lab2_node_insert function.
+	// You need to implement lab2_node_insert function.
 	if (tree->root == NULL) {
-        tree->root = new_node;
-        return LAB2_ERROR;
-    }
-    if (search_key(tree,new_node->key)) {
-        return LAB2_ERROR;
-    }
-    lab2_node* cur = tree->root;
-    while (1) {
-        if (cur->key < new_node->key) {
-            if (cur->right == NULL) {
+		tree->root = new_node;
+		return LAB2_ERROR;
+	}
+	if (search_key(tree,new_node->key)) {
+		return LAB2_ERROR;
+	}
+	lab2_node* cur = tree->root;
+	while (1) {
+		if (cur->key < new_node->key) {
+			if (cur->right == NULL) {
 				cur->right = new_node;
 				return LAB2_SUCCESS;
-            }
-            cur = cur->right;
-        }
-        else {
+			}
+			cur = cur->right;
+		}
+		else {
 			if (cur->left == NULL) {
 				cur->left = new_node;
 				return LAB2_SUCCESS;
-            }
-            cur = cur->left;
-        }
-    }
+			}
+			cur = cur->left;
+		}
+	}
 }
 /* 
  * TODO
@@ -140,31 +138,31 @@ int lab2_node_insert(lab2_tree *tree, lab2_node *new_node){
  *  @return                     : status (success or fail)
  */
 int lab2_node_insert_fg(lab2_tree *tree, lab2_node *new_node){
-    // You need to implement lab2_node_insert function.
-    if (tree->root == NULL) {
-        tree->root = new_node;
-        return LAB2_ERROR;
-    }   
-    if (search_key(tree,new_node->key)) {
-        return LAB2_ERROR;
-    }   
-    lab2_node* cur = tree->root;
-    while (1) {
+	// You need to implement lab2_node_insert function.
+	if (tree->root == NULL) {
+		tree->root = new_node;
+		return LAB2_ERROR;
+	}   
+	if (search_key(tree,new_node->key)) {
+		return LAB2_ERROR;
+	}   
+	lab2_node* cur = tree->root;
+	while (1) {
 		if (cur->key < new_node->key) {
 			if (cur->right == NULL) {
 				cur->right = new_node;
 				return LAB2_SUCCESS;
 			}
-            cur = cur->right;
-        }
-        else {
-            if (cur->left == NULL) {
+			cur = cur->right;
+		}
+		else {
+			if (cur->left == NULL) {
 				cur->left = new_node;
 				return LAB2_SUCCESS;
 			}
-            cur = cur->left;
-        }
-    }   
+			cur = cur->left;
+		}
+	}   
 }
 
 /* 
@@ -177,36 +175,36 @@ int lab2_node_insert_fg(lab2_tree *tree, lab2_node *new_node){
  */
 
 int lab2_node_insert_cg(lab2_tree *tree, lab2_node *new_node){
-    // You need to implement lab2_node_insert function.
-    pthread_mutex_lock(&lock);
+	// You need to implement lab2_node_insert function.
+	pthread_mutex_lock(&lock);
 	if (tree->root == NULL) {
-        tree->root = new_node;
+		tree->root = new_node;
 		pthread_mutex_unlock(&lock);
-        return LAB2_ERROR;
-    }   
-    if (search_key(tree,new_node->key)) {
-        pthread_mutex_unlock(&lock);
 		return LAB2_ERROR;
-    }   
-    lab2_node* cur = tree->root;
-    while (1) {
-        if (cur->key < new_node->key) {
-            if (cur->right == NULL) {
-                cur->right = new_node;
-                pthread_mutex_unlock(&lock);
-                return LAB2_SUCCESS;
-            }
-            cur = cur->right;
-        }
-        else {
-            if (cur->left == NULL) {
-                cur->left = new_node;
-                pthread_mutex_unlock(&lock);
-                return LAB2_SUCCESS;
-            }
-            cur = cur->left;
-        }
-    }   
+	}   
+	if (search_key(tree,new_node->key)) {
+		pthread_mutex_unlock(&lock);
+		return LAB2_ERROR;
+	}   
+	lab2_node* cur = tree->root;
+	while (1) {
+		if (cur->key < new_node->key) {
+			if (cur->right == NULL) {
+				cur->right = new_node;
+				pthread_mutex_unlock(&lock);
+				return LAB2_SUCCESS;
+			}
+			cur = cur->right;
+		}
+		else {
+			if (cur->left == NULL) {
+				cur->left = new_node;
+				pthread_mutex_unlock(&lock);
+				return LAB2_SUCCESS;
+			}
+			cur = cur->left;
+		}
+	}   
 }
 
 
@@ -221,12 +219,10 @@ int lab2_node_insert_cg(lab2_tree *tree, lab2_node *new_node){
 
 int lab2_node_remove(lab2_tree *tree, int key) {
 	// You need to implement lab2_node_remove function.
-	lab2_node* cur2 = NULL;
 	lab2_node* cur = tree->root;
-	lab2_node* par_parent = NULL;
 	lab2_node* parent = NULL;
+	lab2_node* par_parent = NULL;
 	lab2_node* child = NULL;
-	lab2_node* left_temp = NULL;
 	lab2_node* temp = NULL;
 	if(!search_key(tree, key)){
 		return LAB2_ERROR;
@@ -256,7 +252,7 @@ int lab2_node_remove(lab2_tree *tree, int key) {
 		else if(parent->right == cur)
 			parent->right = NULL;
 	}
-   
+
 	else if(cur->left == NULL || cur->right == NULL){ // only has one child
 		child = (cur->left != NULL)? cur->left : cur->right;
 		if (cur == tree->root)
@@ -269,29 +265,29 @@ int lab2_node_remove(lab2_tree *tree, int key) {
 
 	else if((cur->left !=NULL) && (cur->right !=NULL)) // if it has two child
 	{
-      parent = cur;
-	  cur = cur->right;
-	  temp = cur;
-      
-	  while(1){
-		  if ((cur->left) == NULL)
-			  break;
-		  else{
-			  temp = cur;
-			  cur = cur->left;
-		  }
-	  }
-	  (parent->key) = (cur->key);
-	  if (temp != cur){
-		  if ((cur->right) != NULL)
-			  temp->left = cur->right;
-		  else
-			  temp->left = NULL;
-	  }
-	  else
-		  temp->right = cur->right;
+		parent = cur;
+		cur = cur->right;
+		temp = cur;
+
+		while(1){
+			if ((cur->left) == NULL)
+				break;
+			else{
+				temp = cur;
+				cur = cur->left;
+			}
+		}
+		(parent->key) = (cur->key);
+		if (temp != cur){
+			if ((cur->right) != NULL)
+				temp->left = cur->right;
+			else
+				temp->left = NULL;
+		}
+		else
+			temp->right = cur->right;
 	}
-   return LAB2_SUCCESS;
+	return LAB2_SUCCESS;
 }
 
 /* 
@@ -304,16 +300,15 @@ int lab2_node_remove(lab2_tree *tree, int key) {
  */
 int lab2_node_remove_fg(lab2_tree *tree, int key) {
 	// You need to implement lab2_node_remove function.
-	lab2_node* cur2 = NULL;
 	lab2_node* cur = tree->root;
-	lab2_node* par_parent = NULL;
 	lab2_node* parent = NULL;
+	lab2_node* par_parent = NULL;
 	lab2_node* child = NULL;
-	lab2_node* left_temp = NULL;
-	
+	lab2_node* temp = NULL;
 	if(!search_key(tree, key)){
 		return LAB2_ERROR;
 	}
+
 	while(cur->key != key){
 		if(key > cur->key)
 		{
@@ -327,45 +322,53 @@ int lab2_node_remove_fg(lab2_tree *tree, int key) {
 			cur = cur->left;
 		}
 	} // find the node
+
 	pthread_mutex_lock(&lock);
 	if(cur->left == NULL && cur->right == NULL){ // if it is a terminal node
-		if(parent->left == cur)
+		if (cur == tree->root){
+			tree->root = NULL;
+			return LAB2_SUCCESS;
+		}
+		else if(parent->left == cur)
 			parent->left = NULL;
 		else if(parent->right == cur)
 			parent->right = NULL;
 	}
-   
-	else if(cur->left == NULL || cur->right ==NULL){ // only has one child
+
+	else if(cur->left == NULL || cur->right == NULL){ // only has one child
 		child = (cur->left != NULL)? cur->left : cur->right;
-		if(parent->left == cur)
+		if (cur == tree->root)
+			tree->root = child;
+		else if(parent->left == cur)
 			parent->left = child;
 		else
 			parent->right = child;
 	}	
 
-	else if(cur->left !=NULL && cur->right !=NULL) // if it has two child
+	else if((cur->left !=NULL) && (cur->right !=NULL)) // if it has two child
 	{
-      cur2 = cur;
-      cur2 = cur2->right;
-      if(cur2->left == NULL){
-         left_temp = cur->left;
-         child = cur2;
-         if(parent->right == cur){
-            parent->right = child;
-            child->left = left_temp;
-         }
-         else if(parent->left == cur){
-            parent->left = child;
-            child->left = left_temp;
-         }
-      }
-      while(cur2->left !=NULL){
-         parent = cur2;
-         cur2 = cur2->left;
-      }
-      parent->left = NULL;
-      cur->key = cur2->key;
-   }
+		parent = cur;
+		cur = cur->right;
+		temp = cur;
+
+		while(1){
+			if ((cur->left) == NULL)
+				break;
+			else{
+				temp = cur;
+				cur = cur->left;
+			}
+		}
+		(parent->key) = (cur->key);
+		if (temp != cur){
+			if ((cur->right) != NULL)
+				temp->left = cur->right;
+			else
+				temp->left = NULL;
+		}
+		else
+			temp->right = cur->right;
+	}
 	pthread_mutex_unlock(&lock);
 	return LAB2_SUCCESS;
 }
@@ -382,17 +385,16 @@ int lab2_node_remove_fg(lab2_tree *tree, int key) {
 int lab2_node_remove_cg(lab2_tree *tree, int key) {
 	// You need to implement lab2_node_remove function.
 	pthread_mutex_lock(&lock);
-	lab2_node* cur2 = NULL;
 	lab2_node* cur = tree->root;
-	lab2_node* par_parent = NULL;
 	lab2_node* parent = NULL;
+	lab2_node* par_parent = NULL;
 	lab2_node* child = NULL;
-	lab2_node* left_temp = NULL;
-	
+	lab2_node* temp = NULL;
 	if(!search_key(tree, key)){
 		pthread_mutex_unlock(&lock);
 		return LAB2_ERROR;
 	}
+
 	while(cur->key != key){
 		if(key > cur->key)
 		{
@@ -408,42 +410,50 @@ int lab2_node_remove_cg(lab2_tree *tree, int key) {
 	} // find the node
 
 	if(cur->left == NULL && cur->right == NULL){ // if it is a terminal node
-		if(parent->left == cur)
+		if (cur == tree->root){
+			tree->root = NULL;
+			pthread_mutex_unlock(&lock);
+			return LAB2_SUCCESS;
+		}
+		else if(parent->left == cur)
 			parent->left = NULL;
 		else if(parent->right == cur)
 			parent->right = NULL;
 	}
-   
-	else if(cur->left == NULL || cur->right ==NULL){ // only has one child
+
+	else if(cur->left == NULL || cur->right == NULL){ // only has one child
 		child = (cur->left != NULL)? cur->left : cur->right;
-		if(parent->left == cur)
+		if (cur == tree->root)
+			tree->root = child;
+		else if(parent->left == cur)
 			parent->left = child;
 		else
 			parent->right = child;
 	}	
 
-	else if(cur->left !=NULL && cur->right !=NULL) // if it has two child
+	else if((cur->left !=NULL) && (cur->right !=NULL)) // if it has two child
 	{
-      cur2 = cur;
-      cur2 = cur2->right;
-      if(cur2->left == NULL){
-         left_temp = cur->left;
-         child = cur2;
-         if(parent->right == cur){
-            parent->right = child;
-            child->left = left_temp;
-         }
-         else if(parent->left == cur){
-            parent->left = child;
-            child->left = left_temp;
-         }
-      }
-      while(cur2->left !=NULL){
-			parent = cur2;
-			cur2 = cur2->left;
+		parent = cur;
+		cur = cur->right;
+		temp = cur;
+
+		while(1){
+			if ((cur->left) == NULL)
+				break;
+			else{
+				temp = cur;
+				cur = cur->left;
+			}
 		}
-		parent->left = NULL;
-		cur->key = cur2->key;
+		(parent->key) = (cur->key);
+		if (temp != cur){
+			if ((cur->right) != NULL)
+				temp->left = cur->right;
+			else
+				temp->left = NULL;
+		}
+		else
+			temp->right = cur->right;
 	}
 	pthread_mutex_unlock(&lock);
 	return LAB2_SUCCESS;
@@ -458,7 +468,7 @@ int lab2_node_remove_cg(lab2_tree *tree, int key) {
  *  @return                 : status(success or fail)
  */
 int lab2_tree_delete(lab2_tree *tree) {
-    // You need to implement lab2_tree_delete function.
+	// You need to implement lab2_tree_delete function.
 	free(tree);
 	return LAB2_SUCCESS; // success
 }
@@ -472,7 +482,7 @@ int lab2_tree_delete(lab2_tree *tree) {
  *  @return                 : status(success or fail)
  */
 int lab2_node_delete(lab2_node *node) {
-    // You need to implement lab2_node_delete function.
+	// You need to implement lab2_node_delete function.
 	free(node);
 	return LAB2_SUCCESS;
 }
