@@ -129,14 +129,7 @@ int lab2_node_insert(lab2_tree *tree, lab2_node *new_node){
 		}
 	}
 }
-/* 
- * TODO
- *  Implement a function which insert nodes from the BST in fine-garined manner.
- *
- *  @param lab2_tree *tree      : bst which you need to insert new node in fine-grained manner.
- *  @param lab2_node *new_node  : bst node which you need to insert. 
- *  @return                     : status (success or fail)
- */
+
 int lab2_node_insert_fg(lab2_tree *tree, lab2_node *new_node){
 	// You need to implement lab2_node_insert function.
 	if (tree->root == NULL) {
@@ -150,14 +143,18 @@ int lab2_node_insert_fg(lab2_tree *tree, lab2_node *new_node){
 	while (1) {
 		if (cur->key < new_node->key) {
 			if (cur->right == NULL) {
+				pthread_mutex_lock(&lock);
 				cur->right = new_node;
+				pthread_mutex_unlock(&lock);
 				return LAB2_SUCCESS;
 			}
 			cur = cur->right;
 		}
 		else {
 			if (cur->left == NULL) {
+				pthread_mutex_lock(&lock);
 				cur->left = new_node;
+				pthread_mutex_unlock(&lock);
 				return LAB2_SUCCESS;
 			}
 			cur = cur->left;
@@ -165,14 +162,6 @@ int lab2_node_insert_fg(lab2_tree *tree, lab2_node *new_node){
 	}   
 }
 
-/* 
- * TODO
- *  Implement a function which insert nodes from the BST in coarse-garined manner.
- *
- *  @param lab2_tree *tree      : bst which you need to insert new node in coarse-grained manner.
- *  @param lab2_node *new_node  : bst node which you need to insert. 
- *  @return                     : status (success or fail)
- */
 
 int lab2_node_insert_cg(lab2_tree *tree, lab2_node *new_node){
 	// You need to implement lab2_node_insert function.
@@ -206,16 +195,6 @@ int lab2_node_insert_cg(lab2_tree *tree, lab2_node *new_node){
 		}
 	}   
 }
-
-
-/* 
- * TODO
- *  Implement a function which remove nodes from the BST.
- *
- *  @param lab2_tree *tree  : bst tha you need to remove node from bst which contains key.
- *  @param int key          : key value that you want to delete. 
- *  @return                 : status (success or fail)
- */
 
 int lab2_node_remove(lab2_tree *tree, int key) {
 	// You need to implement lab2_node_remove function.
@@ -287,14 +266,6 @@ int lab2_node_remove(lab2_tree *tree, int key) {
 	return LAB2_SUCCESS;
 }
 
-/* 
- * TODO
- *  Implement a function which remove nodes from the BST in fine-grained manner.
- *
- *  @param lab2_tree *tree  : bst tha you need to remove node in fine-grained manner from bst which contains key.
- *  @param int key          : key value that you want to delete. 
- *  @return                 : status (success or fail)
- */
 int lab2_node_remove_fg(lab2_tree *tree, int key) {
 	// You need to implement lab2_node_remove function.
 	lab2_node* cur = tree->root;
@@ -365,15 +336,6 @@ int lab2_node_remove_fg(lab2_tree *tree, int key) {
 	pthread_mutex_unlock(&lock);
 	return LAB2_SUCCESS;
 }
-
-/* 
- * TODO
- *  Implement a function which remove nodes from the BST in coarse-grained manner.
- *
- *  @param lab2_tree *tree  : bst tha you need to remove node in coarse-grained manner from bst which contains key.
- *  @param int key          : key value that you want to delete. 
- *  @return                 : status (success or fail)
- */
 
 int lab2_node_remove_cg(lab2_tree *tree, int key) {
 	// You need to implement lab2_node_remove function.
@@ -447,28 +409,12 @@ int lab2_node_remove_cg(lab2_tree *tree, int key) {
 	return LAB2_SUCCESS;
 }
 
-/*
- * TODO
- *  Implement function which delete struct lab2_tree
- *  ( refer to the ./include/lab2_sync_types.h for structure lab2_node )
- *
- *  @param lab2_tree *tree  : bst which you want to delete. 
- *  @return                 : status(success or fail)
- */
 int lab2_tree_delete(lab2_tree *tree) {
 	// You need to implement lab2_tree_delete function.
 	free(tree);
 	return LAB2_SUCCESS; // success
 }
 
-/*
- * TODO
- *  Implement function which delete struct lab2_node
- *  ( refer to the ./include/lab2_sync_types.h for structure lab2_node )
- *
- *  @param lab2_tree *tree  : bst node which you want to remove. 
- *  @return                 : status(success or fail)
- */
 int lab2_node_delete(lab2_node *node) {
 	// You need to implement lab2_node_delete function.
 	free(node);
