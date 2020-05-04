@@ -21,14 +21,12 @@
 #include <stdbool.h>
 
 #include "lab2_sync_types.h"
-pthread_mutex_t lock;
-
 
 void lab2_node_inorder(lab2_tree *tree, lab2_node *cur) { // 중위순회 구현 : 왼쪽 하위 트리 -> 루트 -> 오른쪽 하위트리 순서로 이동
-	if (cur != NULL) {
-		lab2_node_inorder(tree, cur->left);
-		lab2_node_inorder(tree, cur->right);
-	}
+	if (cur == NULL)return;
+	lab2_node_inorder(tree, cur->left);
+	lab2_node_inorder(tree, cur->right);
+	
 }
 
 int lab2_node_print_inorder(lab2_tree *tree) { // lab2_node_inorder 함수와 나눠서 구현
@@ -45,8 +43,8 @@ lab2_tree *lab2_tree_create() {// 트리생성 함수
 }
 
 
-lab2_node * lab2_node_create(int key) {// key값을 인자로 가지는  노드생성함수
-	.
+lab2_node  *lab2_node_create(int key) {// key값을 인자로 가지는  노드생성함수
+	
 	lab2_node *node = (lab2_node *)malloc(sizeof(lab2_node));
 	node->left = NULL;
 	node->right = NULL;
@@ -85,19 +83,20 @@ int lab2_node_insert(lab2_tree *tree, lab2_node *new_node){ // 트리에 노드�
 	while (1) {
 		if (cur->key < new_node->key) {// key값이 해당 노드 보다 크다면  cur->right이 NULL 이 될 때까지 오른쪽으로 이동
 			if (cur->right == NULL) {
-				cur->right = new_node; // 노드추가
-				return LAB2_SUCCESS;
+				cur->right = new_node;// 노드추가
+				break;
 			}
 			cur = cur->right;
 		}
 		else {						  // key값이 해당 노드 보다 작다면 cur->left가 NULL 이 될 때까지 왼쪽으로 이동
 			if (cur->left == NULL) {
 				cur->left = new_node;// 노드추가
-				return LAB2_SUCCESS;
+				break;
 			}
 			cur = cur->left;
 		}
 	}
+       return LAB2_SUCCESS;
 }
 
 int lab2_node_insert_fg(lab2_tree *tree, lab2_node *new_node){
@@ -113,36 +112,38 @@ int lab2_node_insert_fg(lab2_tree *tree, lab2_node *new_node){
 	while (1) {
 		if (cur->key < new_node->key) {
 			if (cur->right == NULL) {
-				pthread_mutex_lock(&lock);
+				pthread_mutex_lock(&tree->mutex);
 				cur->right = new_node;
-				pthread_mutex_unlock(&lock);
-				return LAB2_SUCCESS;
+				pthread_mutex_unlock(&tree->mutex);
+				break;
 			}
 			cur = cur->right;
 		}
 		else {
 			if (cur->left == NULL) {
-				pthread_mutex_lock(&lock);
+				pthread_mutex_lock(&tree->mutex);
 				cur->left = new_node;
-				pthread_mutex_unlock(&lock);
-				return LAB2_SUCCESS;
+				pthread_mutex_unlock(&tree->mutex);
+				break;
 			}
 			cur = cur->left;
 		}
-	}   
+	}
+       return LAB2_SUCCESS;
+
 }
 
 
 int lab2_node_insert_cg(lab2_tree *tree, lab2_node *new_node){
 	// You need to implement lab2_node_insert function.
-	pthread_mutex_lock(&lock);
+	pthread_mutex_lock(&tree->mutex);
 	if (tree->root == NULL) {
 		tree->root = new_node;
-		pthread_mutex_unlock(&lock);
+		pthread_mutex_unlock(&tree->mutex);
 		return LAB2_ERROR;
 	}   
 	if (search_key(tree,new_node->key)) {
-		pthread_mutex_unlock(&lock);
+		pthread_mutex_unlock(&tree->mutex);
 		return LAB2_ERROR;
 	}   
 	lab2_node* cur = tree->root;
@@ -150,20 +151,21 @@ int lab2_node_insert_cg(lab2_tree *tree, lab2_node *new_node){
 		if (cur->key < new_node->key) {
 			if (cur->right == NULL) {
 				cur->right = new_node;
-				pthread_mutex_unlock(&lock);
-				return LAB2_SUCCESS;
+				 break;
 			}
 			cur = cur->right;
 		}
 		else {
 			if (cur->left == NULL) {
 				cur->left = new_node;
-				pthread_mutex_unlock(&lock);
-				return LAB2_SUCCESS;
+				 break;
 			}
 			cur = cur->left;
 		}
-	}   
+	}
+	   pthread_mutex_unlock(&tree->mutex);
+       return LAB2_SUCCESS;
+
 }
 
 int lab2_node_remove(lab2_tree *tree, int key) {
@@ -194,7 +196,6 @@ int lab2_node_remove(lab2_tree *tree, int key) {
 	if(cur->left == NULL && cur->right == NULL){ // if it is a terminal node
 		if (cur == tree->root){
 			tree->root = NULL;
-			return LAB2_SUCCESS;
 		}
 		else if(parent->left == cur)
 			parent->left = NULL;
@@ -252,7 +253,7 @@ int lab2_node_remove_fg(lab2_tree *tree, int key) {
 		{
 			par_parent = parent;
 			parent = cur;
-			cur = cur->right; 
+			cur = cur->right;
 		}
 		else{
 			par_parent = parent;
@@ -261,62 +262,76 @@ int lab2_node_remove_fg(lab2_tree *tree, int key) {
 		}
 	} // find the node
 
-	pthread_mutex_lock(&lock);
+	 pthread_mutex_lock(&tree->mutex);
 	if(cur->left == NULL && cur->right == NULL){ // if it is a terminal node
 		if (cur == tree->root){
 			tree->root = NULL;
-			return LAB2_SUCCESS;
 		}
-		else if(parent->left == cur)
+		else if(parent->left == cur){
 			parent->left = NULL;
+		}
 		else if(parent->right == cur)
+		{
 			parent->right = NULL;
+		}
+
 	}
 
 	else if(cur->left == NULL || cur->right == NULL){ // only has one child
 		child = (cur->left != NULL)? cur->left : cur->right;
-		if (cur == tree->root)
+		if (cur == tree->root){
 			tree->root = child;
+		}
 		else if(parent->left == cur)
+		{
 			parent->left = child;
-		else
+		}
+		else{
+		
 			parent->right = child;
-	}	
+		}
+
+	}
 
 	else if (cur->left != NULL && cur->right != NULL)
-    {   
-        parent = cur;
-        cur2 = cur->right;
-        while (cur2->left != NULL)
-        {
-            parent = cur2;
-            cur2 = cur2->left;
-        }   
+	{
+		parent = cur;
+		cur2 = cur->right;
+		while (cur2->left != NULL)
+		{
+			parent = cur2;
+			cur2 = cur2->left;
+		}
 
-        if (parent->left == cur2)
-            parent->left = cur2->right;
-        else
-            parent->right = cur2->right;
+		if (parent->left == cur2){
+			parent->left = cur2->right;
+		}
+		else
+		{
+			
+			parent->right = cur2->right;
+		}
 
+		cur->key = cur2->key;
+		cur = cur2;
+		free(cur);
 
-        cur->key = cur2->key;
-        cur = cur2;
-        free(cur);
-    }   
-	pthread_mutex_unlock(&lock);
+	}
+	pthread_mutex_unlock(&tree->mutex);
 	return LAB2_SUCCESS;
 }
 
+
 int lab2_node_remove_cg(lab2_tree *tree, int key) {
 	// You need to implement lab2_node_remove function.
-	pthread_mutex_lock(&lock);
+	pthread_mutex_lock(&tree->mutex);
 	lab2_node* cur = tree->root;
 	lab2_node* parent = NULL;
 	lab2_node* par_parent = NULL;
 	lab2_node* child = NULL;
 	lab2_node* cur2 = NULL;
 	if(!search_key(tree, key)){
-		pthread_mutex_unlock(&lock);
+		pthread_mutex_unlock(&tree->mutex);
 		return LAB2_ERROR;
 	}
 
@@ -337,8 +352,7 @@ int lab2_node_remove_cg(lab2_tree *tree, int key) {
 	if(cur->left == NULL && cur->right == NULL){ // if it is a terminal node
 		if (cur == tree->root){
 			tree->root = NULL;
-			pthread_mutex_unlock(&lock);
-			return LAB2_SUCCESS;
+			
 		}
 		else if(parent->left == cur)
 			parent->left = NULL;
@@ -375,7 +389,7 @@ int lab2_node_remove_cg(lab2_tree *tree, int key) {
         cur = cur2;
         free(cur);
     }   
-	pthread_mutex_unlock(&lock);
+	pthread_mutex_unlock(&tree->mutex);
 	return LAB2_SUCCESS;
 }
 
