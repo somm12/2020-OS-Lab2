@@ -28,6 +28,7 @@
  */
 typedef struct lab2_node {
 
+	pthread_mutex_t lock;
     struct lab2_node *left;
     struct lab2_node *right;
     int key;
@@ -41,7 +42,6 @@ typedef struct lab2_node {
  */
 typedef struct lab2_tree {
     struct lab2_node *root;
-	pthread_mutex_t mutex;
 
 } lab2_tree;
 
