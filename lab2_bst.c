@@ -111,33 +111,31 @@ int lab2_node_insert_fg(lab2_tree *tree, lab2_node *new_node){
 		return LAB2_ERROR;
 	}
 	lab2_node* cur = tree->root;
-	pthread_mutex_lock(&lock);
+	 pthread_mutex_lock(&lock);
 	while (1) {
 		if (cur->key < new_node->key) {
 			if (cur->right == NULL) {
-				// pthread_mutex_lock(&lock);
 				cur->right = new_node;
-				pthread_mutex_unlock(&lock);
+				 pthread_mutex_unlock(&lock);
 				break;
 			}
 			cur = cur->right;
 		}
 		else if(cur->key > new_node->key){
 			if (cur->left == NULL) {
-			//	pthread_mutex_lock(&lock);
 				cur->left = new_node;
-				pthread_mutex_unlock(&lock);
+				 pthread_mutex_unlock(&lock);
 				break;
 			}
 			cur = cur->left;
 		}
 	}
+
        return LAB2_SUCCESS;
 
 }
 
-
-int lab2_node_insert_cg(lab2_tree *tree, lab2_node *new_node){
+int lab2_node_insert_cg(lab2_tree* tree, lab2_node *new_node){
 	// You need to implement lab2_node_insert function.
 	pthread_mutex_lock(&lock);
 	if (tree->root == NULL) {
@@ -234,7 +232,7 @@ int lab2_node_remove(lab2_tree *tree, int key) {
 
 		cur->key = cur2->key;
 		cur = cur2;
-		free(cur);
+		//free(cur);
 
 	}
 	return LAB2_SUCCESS;
@@ -266,10 +264,8 @@ int lab2_node_remove_fg(lab2_tree *tree, int key) {
 			cur = cur->left;
 		}
 	} // find the node
-	pthread_mutex_unlock(&lock);
 
 	if(cur->left == NULL && cur->right == NULL){ // if it is a terminal node
-		 pthread_mutex_lock(&lock);
 		if (cur == tree->root){
 			tree->root = NULL;
 		}
@@ -280,13 +276,11 @@ int lab2_node_remove_fg(lab2_tree *tree, int key) {
 		{
 			parent->right = NULL;
 		}
-		 pthread_mutex_unlock(&lock);
 
 	}
 
 	else if(cur->left == NULL || cur->right == NULL){ // only has one child
-		child = (cur->left != NULL)? cur->left : cur->right;
-		 pthread_mutex_lock(&lock);
+		  child = (cur->left != NULL)? cur->left : cur->right;
 		if (cur == tree->root){
 			tree->root = child;
 		}
@@ -298,13 +292,11 @@ int lab2_node_remove_fg(lab2_tree *tree, int key) {
 		{
 			parent->right = child;
 		}
-		 pthread_mutex_unlock(&lock);
 
 	}
 
 	else if (cur->left != NULL && cur->right != NULL)
 	{
-		 pthread_mutex_lock(&lock);
 		parent = cur;
 		cur2 = cur->right;
 		while (cur2->left != NULL)
@@ -325,8 +317,8 @@ int lab2_node_remove_fg(lab2_tree *tree, int key) {
 		cur->key = cur2->key;
 		cur = cur2;
 		free(cur);
-		 pthread_mutex_unlock(&lock);
 	}
+	pthread_mutex_unlock(&lock);
 	return LAB2_SUCCESS;
 }
 
@@ -396,7 +388,7 @@ int lab2_node_remove_cg(lab2_tree *tree, int key) {
 
         cur->key = cur2->key;
         cur = cur2;
-        free(cur);
+        //free(cur);
     }   
 	pthread_mutex_unlock(&lock);
 	return LAB2_SUCCESS;
